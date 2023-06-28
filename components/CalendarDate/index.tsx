@@ -17,7 +17,7 @@ export default function CalendarDate({ date, id }: ICalendarCellProps) {
   return (
     <td className="bg-[#CCCCCC] text-black p-2 border border-gray-400">
       {date !== -1 && (
-        <button className="flex flex-col gap-2 min-h-[120px] w-full">
+        <button className="flex flex-col gap-2 min-h-[120px] w-full h-full">
           <p className="text-lg">{date}</p>
 
           {events?.length !== 0 && events?.map((event, idx) => {
