@@ -1,12 +1,23 @@
+import AddModal from "@components/AddEventModal";
 import CalendarDate from "@components/CalendarDate";
 import CalendarHeader from "@components/CalendarDay";
-import { convertToTwoDigitString, getCalendarMatrix, getCurrentMonth, getCurrentMonthAndYear, randomColorGenerator } from "@utils/helper";
-import { TCalendar } from "@utils/types";
+import {
+  convertToTwoDigitString,
+  getCalendarData,
+  getCalendarMatrix,
+  getCurrentMonth,
+  getCurrentMonthAndYear,
+  generateRandomColor,
+} from "@utils/helper";
+import { LocalStorage, TAddEvent, TCalendar, TEvent } from "@utils/types";
 import { CalendarContext } from "context/CalendarContext";
-import { useContext, useEffect } from "react";
+import { setCalendar } from "context/CalendarContext/reducer";
+import { useContext, useEffect, useState } from "react";
 
 export default function Calendar() {
   const date = new Date();
+  const [addDate, setAddDate] = useState("");
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const days = [
     "Sunday",
     "Monday",
@@ -17,33 +28,40 @@ export default function Calendar() {
     "Saturday",
   ];
   const calendarMatrix = getCalendarMatrix();
+  const data = getCalendarData() ?? [];
 
   const { dispatch, state } = useContext(CalendarContext);
+
+  const onAddSubmit = (event: TAddEvent) => {
+    console.log(data)
+    // let calendar: TCalendar;
+
+    let newEvent: TEvent = {
+      id: Math.floor(Date.now() / 1000).toString(),
+      eventName: event.eventName,
+      email: event.email,
+      date: event.time,
+      backgroundColor: generateRandomColor(),
+    }
+
+    const selectedDate = data && data.findIndex((date) => date.id === event.id);
+
+    if (selectedDate !== -1 && data) {
+      data[selectedDate].events.push(newEvent)
+    } else {
+      data.push({
+        id: event.id,
+        events: [newEvent],
+      })
+    }
+    console.log(data)
+    window.localStorage.setItem(LocalStorage.CALENDAR, JSON.stringify(data))
+    dispatch(setCalendar(data))
+  };
 
   useEffect(() => {
     const data = window.localStorage.getItem("calendar");
     const tempData = data && JSON.parse(data ?? []);
-    // console.log(tempData, 123);
-    // const item: TCalendar = {
-    //   id: "07062023",
-    //   events: [{
-    //     id:  Math.floor(Date.now() / 1000).toString(),
-    //     eventName: "Belajar",
-    //     email: "steven@gmail.com",
-    //     date: "03:00 PM",
-    //     backgroundColor: randomColorGenerator()
-    //   },
-    //   {
-    //     id: "2023",
-    //     eventName: "Belajar-1",
-    //     email: "steven@gmail.com",
-    //     date: "04:00 PM",
-    //     backgroundColor: randomColorGenerator()
-    //   }],
-    // };
-
-    // window.localStorage.setItem("calendar", JSON.stringify([...tempData, item]))
-    // window.localStorage.setItem("calendar", JSON.stringify([item]))
   }, []);
 
   return (
@@ -62,17 +80,37 @@ export default function Calendar() {
             return (
               <tr key={idx}>
                 {item.map((subItem, idx) => {
-                  const { month, year } = getCurrentMonthAndYear()
-                  console.log(convertToTwoDigitString(subItem) ,convertToTwoDigitString(month) ,convertToTwoDigitString(year))
-                  let id = convertToTwoDigitString(subItem) + convertToTwoDigitString(month) + convertToTwoDigitString(year)
+                  const { month, year } = getCurrentMonthAndYear();
+                 
+                  let id = `${convertToTwoDigitString(
+                    subItem
+                  )}/${convertToTwoDigitString(
+                    month
+                  )}/${convertToTwoDigitString(year)}`;
                   // console.log(id, 22345)
-                  return <CalendarDate date={subItem} key={idx} id={id} />;
+                  return (
+                    <CalendarDate
+                      date={subItem}
+                      key={idx}
+                      id={id}
+                      onAddClick={(date) => {
+                        setAddModalOpen(true);
+                        setAddDate(id);
+                      }}
+                    />
+                  );
                 })}
               </tr>
             );
           })}
         </tbody>
       </table>
+      <AddModal
+        date={addDate}
+        addModalOpen={addModalOpen}
+        setAddModalOpen={setAddModalOpen}
+        onAddEventSubmit={onAddSubmit}
+      />
     </div>
   );
 }

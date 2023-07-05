@@ -10,3 +10,14 @@ export type TCalendar = {
   id: string;
   events: TEvent[];
 }
+
+export type TAddEvent = {
+  id: string,
+  eventName: string,
+  email: string,
+  time: string,
+}
+
+export enum LocalStorage {
+  CALENDAR = "calendar"
+}

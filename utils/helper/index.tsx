@@ -1,3 +1,4 @@
+import { LocalStorage, TCalendar } from "@utils/types";
 import { TMonthYear } from "./type";
 
 export function getCurrentMonth(): string {
@@ -31,7 +32,6 @@ export function getCalendarMatrix(): number[][] {
   let endDateOfEveryMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
   const { year, month } = getCurrentMonthAndYear();
-  console.log(year, month, 1234, new Date(year, month - 1, 1).getDay());
 
   // leap year checker
   if (month == 2) {
@@ -64,8 +64,13 @@ export function convertToTwoDigitString(number: number): string {
   return number < 10 ? `0${number}` : number.toString();
 };
 
-export function randomColorGenerator() {
-  console.log('#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'))
+export function generateRandomColor() {
+  // console.log('#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'))
   // return `hsla(${~~(360 * Math.random())}, 70%,  72%, 0.8)`
   return '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+}
+
+export function getCalendarData(): TCalendar[] {
+  const data = typeof window !== "undefined" ? window.localStorage.getItem(LocalStorage.CALENDAR) : "[]";
+  return data && JSON.parse(data);
 }
