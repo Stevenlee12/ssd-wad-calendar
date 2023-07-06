@@ -74,3 +74,15 @@ export function getCalendarData(): TCalendar[] {
   const data = typeof window !== "undefined" ? window.localStorage.getItem(LocalStorage.CALENDAR) : "[]";
   return data && JSON.parse(data);
 }
+
+export function convertTo12HourFormat(time: string): string {
+  var splitTime = time.split(":");
+  var hour = parseInt(splitTime[0]);
+  var minutes = splitTime[1];
+
+  var period = hour >= 12 ? "PM" : "AM";
+  hour = hour > 12 ? hour - 12 : hour;
+  hour = hour === 0 ? 12 : hour;
+
+  return hour + ":" + minutes + " " + period;
+}

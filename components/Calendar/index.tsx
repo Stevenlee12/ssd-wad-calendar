@@ -1,15 +1,16 @@
 import AddModal from "@components/AddEventModal";
 import CalendarDate from "@components/CalendarDate";
 import CalendarHeader from "@components/CalendarDay";
+import EditEventModal from "@components/EditEventModal";
 import {
   convertToTwoDigitString,
+  generateRandomColor,
   getCalendarData,
   getCalendarMatrix,
   getCurrentMonth,
   getCurrentMonthAndYear,
-  generateRandomColor,
 } from "@utils/helper";
-import { LocalStorage, TAddEvent, TCalendar, TEvent } from "@utils/types";
+import { LocalStorage, TAddEvent, TCalendarCell, TEvent } from "@utils/types";
 import { CalendarContext } from "context/CalendarContext";
 import { setCalendar } from "context/CalendarContext/reducer";
 import { useContext, useEffect, useState } from "react";
@@ -18,6 +19,8 @@ export default function Calendar() {
   const date = new Date();
   const [addDate, setAddDate] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editDate, setEditDate] = useState<TCalendarCell>();
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const days = [
     "Sunday",
     "Monday",
@@ -33,7 +36,7 @@ export default function Calendar() {
   const { dispatch, state } = useContext(CalendarContext);
 
   const onAddSubmit = (event: TAddEvent) => {
-    console.log(data)
+    console.log(data);
     // let calendar: TCalendar;
 
     let newEvent: TEvent = {
@@ -42,21 +45,20 @@ export default function Calendar() {
       email: event.email,
       date: event.time,
       backgroundColor: generateRandomColor(),
-    }
+    };
 
     const selectedDate = data && data.findIndex((date) => date.id === event.id);
 
     if (selectedDate !== -1 && data) {
-      data[selectedDate].events.push(newEvent)
+      data[selectedDate].events.push(newEvent);
     } else {
       data.push({
         id: event.id,
         events: [newEvent],
-      })
+      });
     }
-    console.log(data)
-    window.localStorage.setItem(LocalStorage.CALENDAR, JSON.stringify(data))
-    dispatch(setCalendar(data))
+    window.localStorage.setItem(LocalStorage.CALENDAR, JSON.stringify(data));
+    dispatch(setCalendar(data));
   };
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export default function Calendar() {
   }, []);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto min-w-[800px]">
       <p className="text-center font-bold py-4 text-3xl">{getCurrentMonth()}</p>
       <table className="w-full table-fixed">
         <thead>
@@ -81,7 +83,7 @@ export default function Calendar() {
               <tr key={idx}>
                 {item.map((subItem, idx) => {
                   const { month, year } = getCurrentMonthAndYear();
-                 
+
                   let id = `${convertToTwoDigitString(
                     subItem
                   )}/${convertToTwoDigitString(
@@ -111,6 +113,15 @@ export default function Calendar() {
         setAddModalOpen={setAddModalOpen}
         onAddEventSubmit={onAddSubmit}
       />
+      {editDate && (
+        <EditEventModal
+          editModalOpen={editModalOpen}
+          setEditModalOpen={setEditModalOpen}
+          onEditEventSubmit={onEditSubmit}
+          date={editDate.id}
+          event={editDate.event}
+        />
+      )}
     </div>
   );
 }

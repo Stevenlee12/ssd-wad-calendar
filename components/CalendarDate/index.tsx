@@ -4,6 +4,7 @@ import { CalendarContext } from "context/CalendarContext";
 import { useContext, useEffect, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { ICalendarCellProps } from "./type";
+import { getCalendarData } from "@utils/helper";
 
 export default function CalendarDate({ date, id, onAddClick }: ICalendarCellProps) {
   // let event: TEvent[];
@@ -11,10 +12,8 @@ export default function CalendarDate({ date, id, onAddClick }: ICalendarCellProp
   const { dispatch, state } = useContext(CalendarContext);
 
   useEffect(() => {
-    const rawCalendar = window.localStorage.getItem("calendar");
-    const calendar =
-      rawCalendar &&
-      JSON.parse(rawCalendar ?? []).filter((item: any) => item.id === id)[0];
+    const rawCalendar = getCalendarData();
+    const calendar = rawCalendar.filter((item: any) => item.id === id)[0];
     setEvents(calendar?.events && calendar?.events.map((item: TEvent) => item));
     
   }, [id, state.calendar]);
@@ -25,14 +24,14 @@ export default function CalendarDate({ date, id, onAddClick }: ICalendarCellProp
         <div className="flex flex-col gap-2 min-h-[120px] w-full h-full relative">
           <p className="text-lg">{date}</p>
           {events?.length !== 3 && <button
-            className="flex items-center justify-center bg-black/30 rounded-md w-8 h-8 absolute top-0 right-0"
+            className="flex items-center justify-center bg-black/30 rounded-md w-8 h-8 absolute top-0 right-0 hover:bg-black/50"
             onClick={() => onAddClick(date)}
           >
             <IoMdAdd className="text-white" />
           </button>}
           {events?.length !== 0 &&
             events?.map((event, idx) => {
-              return <EventCell event={event} key={idx} />;
+              return <EventCell event={event} key={idx} parentId={id} />;
             })}
         </div>
       )}

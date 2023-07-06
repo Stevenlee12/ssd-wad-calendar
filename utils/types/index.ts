@@ -18,6 +18,11 @@ export type TAddEvent = {
   time: string,
 }
 
+export type TCalendarCell = {
+  id: string;
+  event: TEvent;
+}
+
 export enum LocalStorage {
   CALENDAR = "calendar"
 }
